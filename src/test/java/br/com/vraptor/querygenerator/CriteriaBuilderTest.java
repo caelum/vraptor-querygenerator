@@ -13,19 +13,19 @@ import org.junit.Test;
 public class CriteriaBuilderTest {
 
 	@Test
-	public void shoulgGetAllParameterNamesFromMethodName() throws Exception {
+	public void shouldgGetAllParameterNamesFromMethodName() throws Exception {
 		Method method = PersonRepositoryHibernate.class.getMethod("findByNameAndAge", new Class[] { String.class,
 				int.class });
 
 		CriteriaBuilder builder = new CriteriaBuilder(method);
 		List<String> parameterNames = builder.getParameterNames();
 
-		List<String> expectedNames = Arrays.asList("Name", "Age");
+		List<String> expectedNames = Arrays.asList("name", "age");
 		assertTrue(parameterNames.containsAll(expectedNames));
 	}
 
 	@Test
-	public void test() throws Exception {
+	public void shouldMapValuesToParameters() throws Exception {
 		Method method = PersonRepositoryHibernate.class.getMethod("findByNameAndAge", new Class[] { String.class,
 				int.class });
 
