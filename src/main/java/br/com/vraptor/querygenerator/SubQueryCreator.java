@@ -10,14 +10,24 @@ import java.util.Map;
 
 import org.hibernate.Criteria;
 import org.hibernate.criterion.Criterion;
-import org.hibernate.criterion.Restrictions;
 
 // proxifiador de repositorios, para fazer subquery
 
 public class SubQueryCreator implements InvocationHandler, CriteriaAccumulator {
 
-	private final List<Criterion> criterionsToAddLater = new ArrayList<>();
+	private final List<NameAndValue> criterionsToAddLater = new ArrayList<>();
 	private final Map<String, CriteriaAccumulator> accumulatorsToAddLater = new HashMap<>();
+
+	class NameAndValue {
+		String name;
+		Object value;
+
+		public NameAndValue(String name, Object value) {
+			this.name = name;
+			this.value = value;
+		}
+
+	}
 
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -29,13 +39,12 @@ public class SubQueryCreator implements InvocationHandler, CriteriaAccumulator {
 
 			for (String parameter : parameters.keySet()) {
 				Object value = parameters.get(parameter);
-				// if (value instanceof CriteriaAccumulator) {
-				// CriteriaAccumulator subQueryParameters =
-				// (CriteriaAccumulator) value;
-				// accumulatorsToAddLater.put(name, subQueryParameters);
-				// } else {
-				criterionsToAddLater.add(Restrictions.eq(parameter, value));
-				// }
+				if (value instanceof CriteriaAccumulator) {
+					CriteriaAccumulator subQueryParameters = (CriteriaAccumulator) value;
+					accumulatorsToAddLater.put(parameter, subQueryParameters);
+				} else {
+					criterionsToAddLater.add(new NameAndValue(parameter, value));
+				}
 			}
 
 			return proxyThis(RepositoryHibernateInvocationHandler.getReturnTypeFor(method));
@@ -68,13 +77,15 @@ public class SubQueryCreator implements InvocationHandler, CriteriaAccumulator {
 	}
 
 	@Override
-	public void applyTo(Criteria criteria) {
-		for (Criterion criterion : criterionsToAddLater) {
+	public void applyTo(Criteria criteria, ParameterNameExtractors extractors) {
+		for (NameAndValue nameAndValue : criterionsToAddLater) {
+			Criterion criterion = extractors.getExtractorFor(nameAndValue.name).getRestriction(nameAndValue.name,
+					nameAndValue.value);
 			criteria.add(criterion);
 		}
 		for (String name : accumulatorsToAddLater.keySet()) {
 			Criteria subquery = criteria.createCriteria(name);
-			accumulatorsToAddLater.get(name).applyTo(subquery);
+			accumulatorsToAddLater.get(name).applyTo(subquery, extractors);
 		}
 	}
 }

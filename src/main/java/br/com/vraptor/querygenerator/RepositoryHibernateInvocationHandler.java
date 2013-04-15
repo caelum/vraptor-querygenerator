@@ -8,14 +8,15 @@ import java.util.Map;
 
 import org.hibernate.Criteria;
 import org.hibernate.Session;
-import org.hibernate.criterion.Restrictions;
 
 public class RepositoryHibernateInvocationHandler implements InvocationHandler {
 
 	private final Session session;
+	private final ParameterNameExtractors extractors;
 
-	public RepositoryHibernateInvocationHandler(Session session) {
+	public RepositoryHibernateInvocationHandler(Session session, ParameterNameExtractors extractors) {
 		this.session = session;
+		this.extractors = extractors;
 	}
 
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
@@ -33,14 +34,19 @@ public class RepositoryHibernateInvocationHandler implements InvocationHandler {
 			Class<?> returnType = getReturnTypeFor(method);
 			Criteria criteria = session.createCriteria(returnType);
 
-			for (String parameter : parameters.keySet()) {
-				Object value = parameters.get(parameter);
+			for (String parameterKey : parameters.keySet()) {
+
+				Object value = parameters.get(parameterKey);
+
+				NameAndConditionExtractor extractor = extractors.getExtractorFor(parameterKey);
+				String parameter = extractor.getName(parameterKey);
+
 				if (value instanceof CriteriaAccumulator) {
 					CriteriaAccumulator subQueryParameters = (CriteriaAccumulator) value;
 					Criteria subQuery = criteria.createCriteria(parameter);
-					subQueryParameters.applyTo(subQuery);
+					subQueryParameters.applyTo(subQuery, extractors);
 				} else {
-					criteria.add(Restrictions.eq(parameter, value));
+					criteria.add(extractor.getRestriction(parameterKey, value));
 				}
 			}
 

@@ -18,4 +18,6 @@ public interface PersonRepositoryHibernate {
 	public List<Person> findAllByNameAndAge(String name, int age);
 
 	public Person findByNameAndCity(String name, City city);
+
+	public Person findBySimilarName(String name);
 }

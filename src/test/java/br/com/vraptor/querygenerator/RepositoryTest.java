@@ -2,6 +2,7 @@ package br.com.vraptor.querygenerator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,7 +32,7 @@ public class RepositoryTest {
 	@Before
 	public void setUp() {
 		session = mock(Session.class);
-		this.factory = new RepositoryHibernateProxyFactory(session);
+		this.factory = new RepositoryHibernateProxyFactory(session, new ParameterNameExtractors());
 		repository = factory.getInstance(PersonRepositoryHibernate.class);
 	}
 
@@ -45,7 +46,10 @@ public class RepositoryTest {
 		assertNotNull(person);
 	}
 
-	// testar mesma busca com collection de retorno sem generic
+	@Test
+	public void shouldFindACollectionWithoutGeneric() {
+		fail();
+	}
 
 	@Test
 	public void shouldFindAllEntities() {
@@ -72,6 +76,19 @@ public class RepositoryTest {
 
 		verify(criteria).add(Mockito.argThat(new RestrictionEq("age", 18)));
 		verify(criteria).add(Mockito.argThat(new RestrictionEq("name", "Guilherme")));
+		assertEquals(guilherme, found);
+	}
+
+	@Test
+	public void shouldSupportQueriesWithLike() {
+		Criteria criteria = mock(Criteria.class);
+		Person guilherme = new Person("guilherme", 18);
+		when(criteria.uniqueResult()).thenReturn(guilherme);
+		when(session.createCriteria(Person.class)).thenReturn(criteria);
+
+		Person found = repository.findBySimilarName("Guilherme");
+
+		verify(criteria).add(Mockito.argThat(new RestrictionLike("name", "Guilherme")));
 		assertEquals(guilherme, found);
 	}
 

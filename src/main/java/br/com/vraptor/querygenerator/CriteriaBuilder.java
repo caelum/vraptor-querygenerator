@@ -40,13 +40,17 @@ public class CriteriaBuilder {
 		List<String> names = new ArrayList<>();
 
 		for (String parameter : parameters) {
-			if (parameter.length() == 1) {
-				names.add(parameter.toLowerCase());
-			} else {
-				names.add(Character.toLowerCase(parameter.charAt(0)) + parameter.substring(1));
-			}
+			parameter = toLowerCase(parameter);
+			names.add(parameter);
 		}
 
 		return names;
+	}
+
+	public static String toLowerCase(String parameter) {
+		if (parameter.length() == 1) {
+			return (parameter.toLowerCase());
+		}
+		return (Character.toLowerCase(parameter.charAt(0)) + parameter.substring(1));
 	}
 }

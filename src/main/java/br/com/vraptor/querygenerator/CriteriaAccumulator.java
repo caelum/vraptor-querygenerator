@@ -4,6 +4,6 @@ import org.hibernate.Criteria;
 
 public interface CriteriaAccumulator {
 
-	public abstract void applyTo(Criteria sub);
+	public abstract void applyTo(Criteria sub, ParameterNameExtractors extractors);
 
 }
