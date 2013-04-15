@@ -1,5 +1,6 @@
 package br.com.vraptor.querygenerator;
 
+import static br.com.vraptor.querygenerator.And.and;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -7,11 +8,8 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import org.hibernate.Criteria;
@@ -20,7 +18,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
 
-import br.com.vraptor.model.House;
 import br.com.vraptor.model.Person;
 
 public class RepositoryTest {
@@ -38,7 +35,7 @@ public class RepositoryTest {
 
 	@Test
 	public void shouldGenerateAFindByIdImplementation() {
-		when(session.load(Person.class, 1L)).thenReturn(new Person(1L, Collections.<House> emptyList()));
+		when(session.load(Person.class, 1L)).thenReturn(new Person(1L));
 
 		Person person = repository.findById(1L);
 
@@ -115,8 +112,7 @@ public class RepositoryTest {
 		when(criteria.createCriteria("city")).thenReturn(cityCriteria);
 		when(session.createCriteria(Person.class)).thenReturn(criteria);
 
-		Person found = repository.findByNameAndCity("Guilherme",
-				and(CityRepository.class).findByName("Sao Paulo"));
+		Person found = repository.findByNameAndCity("Guilherme", and(CityRepository.class).findByName("Sao Paulo"));
 
 		verify(cityCriteria).add(Mockito.argThat(new RestrictionEq("name", "Sao Paulo")));
 		verify(criteria).add(Mockito.argThat(new RestrictionEq("name", "Guilherme")));
@@ -141,15 +137,6 @@ public class RepositoryTest {
 		verify(cityCriteria).add(Mockito.argThat(new RestrictionEq("name", "Sao Paulo")));
 		verify(criteria).add(Mockito.argThat(new RestrictionEq("name", "Guilherme")));
 		assertEquals(guilherme, found);
-	}
-
-	private static <T> T and(Class<T> type) {
-		InvocationHandler handler = new SubQueryCreator();
-
-		return (T) Proxy.newProxyInstance(
-				RepositoryTest.class.getClassLoader(),
-				new Class<?>[] { type },
-				handler);
 	}
 
 	@Test(expected = RuntimeException.class)

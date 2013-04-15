@@ -18,17 +18,6 @@ public class SubQueryCreator implements InvocationHandler, CriteriaAccumulator {
 	private final List<NameAndValue> criterionsToAddLater = new ArrayList<>();
 	private final Map<String, CriteriaAccumulator> accumulatorsToAddLater = new HashMap<>();
 
-	class NameAndValue {
-		String name;
-		Object value;
-
-		public NameAndValue(String name, Object value) {
-			this.name = name;
-			this.value = value;
-		}
-
-	}
-
 	@Override
 	public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 		String name = method.getName();
@@ -87,5 +76,16 @@ public class SubQueryCreator implements InvocationHandler, CriteriaAccumulator {
 			Criteria subquery = criteria.createCriteria(name);
 			accumulatorsToAddLater.get(name).applyTo(subquery, extractors);
 		}
+	}
+
+	class NameAndValue {
+		String name;
+		Object value;
+
+		public NameAndValue(String name, Object value) {
+			this.name = name;
+			this.value = value;
+		}
+
 	}
 }
