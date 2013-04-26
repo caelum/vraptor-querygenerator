@@ -12,8 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import br.com.vraptor.model.Person;
-import br.com.vraptor.querygenerator.ParameterNameExtractors;
 import br.com.vraptor.querygenerator.PersonRepositoryHibernate;
+import br.com.vraptor.querygenerator.QueryExecutor;
 import br.com.vraptor.querygenerator.RepositoryHibernateProxyFactory;
 
 public class HibernateRepositoryTest {
@@ -36,8 +36,7 @@ public class HibernateRepositoryTest {
 
 	@Test
 	public void shouldFindAllEntities() throws Exception {
-		RepositoryHibernateProxyFactory repositoryHibernateProxyFactory = new RepositoryHibernateProxyFactory(session,
-				new ParameterNameExtractors());
+		RepositoryHibernateProxyFactory repositoryHibernateProxyFactory = new RepositoryHibernateProxyFactory(new QueryExecutor(session));
 		PersonRepositoryHibernate personRepository = repositoryHibernateProxyFactory
 				.getInstance(PersonRepositoryHibernate.class);
 
