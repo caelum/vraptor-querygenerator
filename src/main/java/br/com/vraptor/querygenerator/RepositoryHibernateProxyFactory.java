@@ -3,21 +3,17 @@ package br.com.vraptor.querygenerator;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
 
-import org.hibernate.Session;
-
 public class RepositoryHibernateProxyFactory {
 
-	private final Session session;
-	private final ParameterNameExtractors extractors;
+	private final QueryExecutor executor;
 
-	public RepositoryHibernateProxyFactory(Session session, ParameterNameExtractors extractors) {
-		this.session = session;
-		this.extractors = extractors;
+	public RepositoryHibernateProxyFactory(QueryExecutor executor) {
+		this.executor = executor;
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T getInstance(Class<T> clazz) {
-		InvocationHandler handler = new RepositoryHibernateInvocationHandler(session, extractors);
+		InvocationHandler handler = new RepositoryHibernateInvocationHandler(executor);
 
 		return (T) Proxy.newProxyInstance(
 				getClass().getClassLoader(),

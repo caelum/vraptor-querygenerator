@@ -1,5 +1,7 @@
 package br.com.vraptor.querygenerator;
 
+import static br.com.vraptor.querygenerator.query.QueryReturnTypes.getReturnTypeFor;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -36,7 +38,7 @@ public class SubQueryCreator implements InvocationHandler, CriteriaAccumulator {
 				}
 			}
 
-			return proxyThis(RepositoryHibernateInvocationHandler.getReturnTypeFor(method));
+			return proxyThis(getReturnTypeFor(method));
 		}
 
 		throw new RuntimeException("method not supported: " + method.getName());

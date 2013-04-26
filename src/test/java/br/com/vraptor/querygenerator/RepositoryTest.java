@@ -29,7 +29,7 @@ public class RepositoryTest {
 	@Before
 	public void setUp() {
 		session = mock(Session.class);
-		this.factory = new RepositoryHibernateProxyFactory(session, new ParameterNameExtractors());
+		this.factory = new RepositoryHibernateProxyFactory(new QueryExecutor(session));
 		repository = factory.getInstance(PersonRepositoryHibernate.class);
 	}
 
